@@ -766,6 +766,18 @@ static void DWCi_UpdateFriendReq (DWCFriendData friendList[], int friendListLen)
                                   &friendList[stpFriendCnt->buddyUpdateIdx],
                                   userName);
 
+            #ifdef SDK_PORT
+            gpProfileSearch(stpFriendCnt->pGpObj,
+                            NULL,
+                            NULL,
+                            NULL,
+                            NULL,
+                            userName,
+                            (int)NULL,
+                            GP_NON_BLOCKING,
+                            (GPCallback)DWCi_GPProfileSearchCallback,
+                            (void *)stpFriendCnt->buddyUpdateIdx);
+            #else
             gpProfileSearch(stpFriendCnt->pGpObj,
                             NULL,
                             NULL,
@@ -776,6 +788,7 @@ static void DWCi_UpdateFriendReq (DWCFriendData friendList[], int friendListLen)
                             GP_NON_BLOCKING,
                             (GPCallback)DWCi_GPProfileSearchCallback,
                             (void *)stpFriendCnt->buddyUpdateIdx);
+            #endif
 
             DWC_Printf(DWC_REPORTFLAG_UPDATE_SV, "Called gpProfileSearch().\n");
 

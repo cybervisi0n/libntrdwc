@@ -5,7 +5,8 @@ libdwcgsqr2 = library('dwcgsqr2',
     sources: files(
         'qr2.c',
         'qr2regkeys.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgsqr2

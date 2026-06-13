@@ -13,7 +13,8 @@ libdwcgsgt2 = library('dwcgsgt2',
         'gt2Message.c',
         'gt2Socket.c',
         'gt2Utility.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgsgt2

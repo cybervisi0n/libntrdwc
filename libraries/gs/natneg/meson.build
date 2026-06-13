@@ -4,7 +4,8 @@ libdwcnatneg = library('dwcgsnatneg',
     pic: false,
     sources: files(
         'natneg.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcnatneg

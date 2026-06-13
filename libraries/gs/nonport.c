@@ -374,6 +374,32 @@ int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* 
 	return rcode;
 }
 
+#ifndef SDK_BUILD_ARM
+gsi_u32 gsiGetBroadcastIP(void)
+{
+#if defined(_NITRO)
+	gsi_u32 ip;
+	IP_GetBroadcastAddr(NULL, (u8*)&ip);
+	return ip;
+#else
+	return 0xFFFFFFFF;
+#endif
+}
+
+int SetSockBroadcast(SOCKET sock)
+{
+#if !defined(INSOCK) && !defined(_NITRO)
+	int optval = 1;
+	if(setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&optval, sizeof(optval)) != 0)
+		return 0;
+#else
+	GSI_UNUSED(sock);
+#endif
+
+	return 1;
+}
+#endif
+
 // Return 1 for immediate recv, otherwise 0
 int CanReceiveOnSocket(SOCKET sock)
 {
@@ -682,22 +708,38 @@ static int CheckRcode(int rcode, int errCode)
 	return errCode;
 }
 
+#ifdef SDK_BUILD_ARM
 int socket(int pf, int type, int protocol)
+#else
+int libdwcgs_socket(int pf, int type, int protocol)
+#endif
 {
 	int rcode = SOC_Socket(pf, type, protocol);
 	return CheckRcode(rcode, INVALID_SOCKET);
 }
+#ifdef SDK_BUILD_ARM
 int closesocket(SOCKET sock)
+#else
+int libdwcgs_closesocket(SOCKET sock)
+#endif
 {
 	int rcode = SOC_Close(sock);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+#ifdef SDK_BUILD_ARM
 int shutdown(SOCKET sock, int how)
+#else
+int libdwcgs_shutdown(SOCKET sock, int how)
+#endif
 {
 	int rcode = SOC_Shutdown(sock, how);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+#ifdef SDK_BUILD_ARM
 int bind(SOCKET sock, const SOCKADDR* addr, int len)
+#else
+int libdwcgs_bind(SOCKET sock, const SOCKADDR* addr, int len)
+#endif
 {
 	SOCKADDR localAddr;
 	int rcode;
@@ -713,7 +755,11 @@ int bind(SOCKET sock, const SOCKADDR* addr, int len)
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
 
+#ifdef SDK_BUILD_ARM
 int connect(SOCKET sock, const SOCKADDR* addr, int len)
+#else
+int libdwcgs_connect(SOCKET sock, const SOCKADDR* addr, int len)
+#endif
 {
 	SOCKADDR remoteAddr;
 	int rcode;
@@ -724,12 +770,20 @@ int connect(SOCKET sock, const SOCKADDR* addr, int len)
 	rcode = SOC_Connect(sock, &remoteAddr);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+#ifdef SDK_BUILD_ARM
 int listen(SOCKET sock, int backlog)
+#else
+int libdwcgs_listen(SOCKET sock, int backlog)
+#endif
 {
 	int rcode = SOC_Listen(sock, backlog);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+#ifdef SDK_BUILD_ARM
 SOCKET accept(SOCKET sock, SOCKADDR* addr, int* len)
+#else
+SOCKET libdwcgs_accept(SOCKET sock, SOCKADDR* addr, int* len)
+#endif
 {
 	int rcode;
 	addr->len = (u8)*len;
@@ -738,12 +792,20 @@ SOCKET accept(SOCKET sock, SOCKADDR* addr, int* len)
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
 
+#ifdef SDK_BUILD_ARM
 int recv(SOCKET sock, char* buf, int len, int flags)
+#else
+int libdwcgs_recv(SOCKET sock, char* buf, int len, int flags)
+#endif
 {
 	int rcode = SOC_Recv(sock, buf, len, flags);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+#ifdef SDK_BUILD_ARM
 int recvfrom(SOCKET sock, char* buf, int len, int flags, SOCKADDR* addr, int* fromlen)
+#else
+int libdwcgs_recvfrom(SOCKET sock, char* buf, int len, int flags, SOCKADDR* addr, int* fromlen)
+#endif
 {
 	int rcode;
 	addr->len = (u8)*fromlen;
@@ -751,12 +813,20 @@ int recvfrom(SOCKET sock, char* buf, int len, int flags, SOCKADDR* addr, int* fr
 	*fromlen = addr->len;
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+#ifdef SDK_BUILD_ARM
 SOCKET send(SOCKET sock, const char* buf, int len, int flags)
+#else
+SOCKET libdwcgs_send(SOCKET sock, const char* buf, int len, int flags)
+#endif
 {
 	int rcode = SOC_Send(sock, buf, len, flags);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+#ifdef SDK_BUILD_ARM
 SOCKET sendto(SOCKET sock, const char* buf, int len, int flags, const SOCKADDR* addr, int tolen)
+#else
+SOCKET libdwcgs_sendto(SOCKET sock, const char* buf, int len, int flags, const SOCKADDR* addr, int tolen)
+#endif
 {
 	SOCKADDR remoteAddr;
 	int rcode;
@@ -768,18 +838,31 @@ SOCKET sendto(SOCKET sock, const char* buf, int len, int flags, const SOCKADDR* 
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
 
+#ifdef SDK_BUILD_ARM
 int getsockopt(SOCKET sock, int level, int optname, char* optval, int* optlen)
+#else
+int libdwcgs_getsockopt(SOCKET sock, int level, int optname, char* optval, int* optlen)
+#endif
 {
 	int rcode = SOC_GetSockOpt(sock, level, optname, optval, optlen);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
+
+#ifdef SDK_BUILD_ARM
 SOCKET setsockopt(SOCKET sock, int level, int optname, const char* optval, int optlen)
+#else
+SOCKET libdwcgs_setsockopt(SOCKET sock, int level, int optname, const char* optval, int optlen)
+#endif
 {
 	int rcode = SOC_SetSockOpt(sock, level, optname, optval, optlen);
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
 
+#ifdef SDK_BUILD_ARM
 int getsockname(SOCKET sock, SOCKADDR* addr, int* len)
+#else
+int libdwcgs_getsockname(SOCKET sock, SOCKADDR* addr, int* len)
+#endif
 {
 	int rcode;
 	addr->len = (u8)*len;
@@ -788,7 +871,11 @@ int getsockname(SOCKET sock, SOCKADDR* addr, int* len)
 	return CheckRcode(rcode, NITRO_SOCKET_ERROR);
 }
 
+#ifdef SDK_BUILD_ARM
 unsigned long inet_addr(const char* name)
+#else
+unsigned long libdwcgs_inet_addr(const char* name)
+#endif
 {
 	int rcode;
 	SOInAddr addr;

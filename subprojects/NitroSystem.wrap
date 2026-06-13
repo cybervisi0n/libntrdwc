@@ -1,6 +1,6 @@
 [wrap-git]
-url = https://github.com/Nomura-RH/NitroSystem.git
-revision = head
+url = https://github.com/cybervisi0n/NitroSystem.git
+revision = main
 depth = 1
 
 [provide]

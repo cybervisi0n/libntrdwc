@@ -7,8 +7,10 @@ libdwcgscommon = library('dwcgscommon',
         '../darray.c',
         '../hashtable.c',
         '../md5c.c',
-        '../nonport.c'
-    )
+        '../nonport.c',
+        '../stringutil.c'
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgscommon

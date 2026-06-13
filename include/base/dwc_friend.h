@@ -180,7 +180,9 @@ extern void DWCi_UpdateServersAsync(const char * authToken,
 
 extern void DWCi_StopFriendProcess(DWCError error, int errorCode);
 
+#ifndef SDK_PORT
 extern void DWCi_GPGetInfoCallback(GPConnection * connection, GPGetInfoResponseArg * arg, void * param);
+#endif
 extern void DWCi_GPRecvBuddyRequestCallback(GPConnection * connection, GPRecvBuddyRequestArg * arg, void * param);
 extern BOOL DWCi_GPRecvBuddyAuthCallback(GPConnection * connection, GPRecvBuddyMessageArg * arg, void * param);
 extern void DWCi_GPRecvBuddyStatusCallback(GPConnection * connection, GPRecvBuddyStatusArg * arg, void * param);

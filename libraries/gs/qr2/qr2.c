@@ -117,6 +117,7 @@ static int get_sockaddrin(const char *host, int port, struct sockaddr_in *saddr,
 static void qr2_check_queries(qr2_t qrec);
 static void qr2_check_send_heartbeat(qr2_t qrec);
 static void enum_local_ips();
+qr2_error_t qr2_create_socket(/*[out]*/SOCKET *sock, const char *ip, /*[in/out]*/int * port);
 
 /****************************************************************************/
 /* PUBLIC FUNCTIONS */
@@ -242,6 +243,70 @@ qr2_error_t qr2_init_socketW(/*[out]*/qr2_t *qrec, SOCKET s, int boundport, cons
 	return qr2_init_socketA(qrec, s, boundport, gamename_A, secretkey_A, ispublic, natnegotiate,
 							server_key_callback, player_key_callback, team_key_callback,
 							key_list_callback, playerteam_count_callback, adderror_callback, userdata);
+}
+
+qr2_error_t qr2_create_socket(/*[out]*/SOCKET *sock, const char *ip, /*[in/out]*/int * port)
+{
+	struct sockaddr_in saddr;	
+	SOCKET hbsock;
+	int maxport;
+	int lasterror = 0;
+	int saddrlen;
+	int baseport = *port;
+
+	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Misc, GSIDebugLevel_StackTrace,
+		"qr2_create_socket()\r\n");
+
+	SocketStartUp();
+	
+	//hbsock = libdwcgs_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (INVALID_SOCKET == hbsock)
+	{
+		gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Network, GSIDebugLevel_HotError,
+			"Failed to create heartbeat socket\r\n");
+		return e_qrwsockerror;
+	}
+	
+	maxport = baseport + NUM_PORTS_TO_TRY;
+	while (baseport < maxport)
+	{
+		get_sockaddrin(ip,baseport,&saddr,NULL);
+		if (saddr.sin_addr.s_addr == htonl(0x7F000001)) //localhost -- we don't want that!
+			saddr.sin_addr.s_addr = INADDR_ANY;
+		
+		//lasterror = libdwcgs_bind(hbsock, (struct sockaddr *)&saddr, sizeof(saddr));
+		if (lasterror == 0)
+			break; //we found a port
+		baseport++;
+	}
+	
+	if (lasterror != 0) //we weren't able to find a port
+	{
+		gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Network, GSIDebugLevel_HotError,
+			"Failed to bind() query socket\r\n");
+		return e_qrbinderror;
+	}
+	
+	if (baseport == 0) //we bound it dynamically
+	{
+		saddrlen = sizeof(saddr);
+		//lasterror = libdwcgs_getsockname(hbsock,(struct sockaddr *)&saddr, &saddrlen);
+		if (lasterror)
+		{
+			gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Network, GSIDebugLevel_HotError,
+				"Query socket bind() success, but getsockname() failed\r\n");
+			return e_qrbinderror;
+		}
+		baseport = ntohs(saddr.sin_port);
+	}
+
+	*sock = hbsock;
+	*port = baseport;
+
+	gsDebugFormat(GSIDebugCat_QR2, GSIDebugType_Network, GSIDebugLevel_Comment,
+		"Query socket created and bound to port %d\r\n", *port);
+
+	return e_qrnoerror;
 }
 
 qr2_error_t qr2_initA(/*[out]*/qr2_t *qrec, const char *ip, int baseport, const char *gamename, const char *secret_key,

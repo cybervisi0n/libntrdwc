@@ -9,7 +9,8 @@ libdwcgschat = library('dwcgschat',
         'chatHandlers.c',
         'chatMain.c',
         'chatSocket.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgschat

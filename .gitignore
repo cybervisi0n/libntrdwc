@@ -1,0 +1,5 @@
+.cache/
+subprojects/.wraplock
+subprojects/NitroSDK/
+subprojects/NitroSystem/
+subprojects/NitroWiFi/

@@ -11,7 +11,8 @@ libdwcgsghttp = library('dwcgsghttp',
         'ghttpMain.c',
         'ghttpPost.c',
         'ghttpProcess.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgsghttp

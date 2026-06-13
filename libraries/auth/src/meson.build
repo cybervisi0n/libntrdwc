@@ -1,0 +1,20 @@
+libdwcauth_srcs = files(
+    'dwc_auth.c',
+    'dwc_ca_cybertrust_baltimore.c',
+    'dwc_ca_cybertrust_globalsign.c',
+    'dwc_ca_cybertrust_gteglroot.c',
+    'dwc_ca_cybertrust_gteroot.c',
+    'dwc_ca_nas_self.c',
+    'dwc_ca_thawte_premiumserver.c',
+    'dwc_ca_thawte_server.c',
+    'dwc_ca_verisign_c3pcag2v2.c',
+    'dwc_ca_verisign_c3pcag3v2.c',
+    'dwc_ca_verisign_pca3ssv4.c',
+    'dwc_ca_verisign_secureserver.c',
+    'dwc_cal.c',
+    'dwc_http.c',
+    'dwc_nastime.c',
+    'dwc_netcheck.c',
+    'dwc_svl.c',
+    'util_base64.c'
+)

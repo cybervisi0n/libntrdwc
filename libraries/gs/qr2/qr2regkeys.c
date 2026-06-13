@@ -1,6 +1,10 @@
 
 #include "gs/qr2/qr2regkeys.h"
 
+#ifdef SDK_PORT
+#include "gs/stringutil.h"
+#endif
+
 #ifdef __MWERKS__ // CodeWarrior requires prototypes
 void qr2_register_keyW(int keyid, const unsigned short *key);
 void qr2_register_keyA(int keyid, const char *key);

@@ -17,7 +17,8 @@ libdwcgsgp = library('dwcgsgp',
         'gpiTransfer.c',
         'gpiUnique.c',
         'gpiUtility.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgsgp

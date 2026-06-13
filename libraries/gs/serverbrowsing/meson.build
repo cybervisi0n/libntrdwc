@@ -8,7 +8,8 @@ libdwcgsserverbrowsing = library('dwcgsserverbrowsing',
         'sb_server.c',
         'sb_serverbrowsing.c',
         'sb_serverlist.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgsserverbrowsing

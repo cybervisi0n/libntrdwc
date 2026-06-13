@@ -10,6 +10,10 @@
 #include <auth/dwc_auth.h>
 #include <auth/dwc_netcheck.h>
 
+#ifdef SDK_PORT
+#include <nitroWiFi/wcm.h>
+#endif
+
 #define DWC_CONNECTINET_DMA_DEFAULT      3
 #define DWC_CONNECTINET_POWERMODE_SAVE   0
 #define DWC_CONNECTINET_POWERMODE_ACTIVE 1
@@ -199,10 +203,12 @@ void DWC_ProcessInet (void)
         stpInetCntl->ac_state = DWC_AC_Process();
     } else if (stpInetCntl->state == DWC_CONNECTINET_STATE_CONNECTED) {
         if (stpInetCntl->online) {
+            #ifndef SDK_PORT
             if (WCM_GetPhase() != WCM_PHASE_DCF) {
                 stpInetCntl->online = FALSE;
                 stpInetCntl->state = DWC_CONNECTINET_STATE_DISCONNECTED;
             }
+            #endif
         }
     }
 }

@@ -5,7 +5,8 @@ libdwcgsgstats = library('dwcgsgstats',
     sources: files(
         'gbucket.c',
         'gstats.c'
-    )
+    ),
+    native: build_target != 'arm'
 )
 
 nitrodwc_libs += libdwcgsgstats

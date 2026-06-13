@@ -33,6 +33,10 @@ void FIFODebugCheck(SBServerFIFO *fifo)
 #define FIFODebugCheck(a)
 #endif
 
+#ifdef SDK_PORT
+void SBServerParseQR2FullKeysSingle(SBServer server, char *data, int len);
+#endif
+
 //FIFO Queue management functions
 static void FIFOAddRear(SBServerFIFO *fifo, SBServer server)
 {

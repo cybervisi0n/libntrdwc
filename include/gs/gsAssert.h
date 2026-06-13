@@ -79,7 +79,11 @@ void gsDebugAssertCallbackSet(gsDebugAssertCallback theCallback);
 #define GS_STATIC_CHECK(expr, msg)    { CompileTimeError<((expr) != 0)> ERROR_##msg; (void)ERROR_##msg; } 
 
 // added to match without having to fuck around with whitespace
+#ifdef SDK_PORT
+#define assertWithLine(condition, line)
+#else
 #define assertWithLine(condition, line) ((condition) ? ((void) 0) : __msl_assertion_failed(#condition, __FILE__, __func__, line))
+#endif
 
 
 #if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)

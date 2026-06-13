@@ -1405,4 +1405,110 @@ GHTTPBool ghttpPostAddFileFromMemoryW
 }
 #endif
 
+#ifdef SDK_PORT
+static GHTTPBool ghiParseProxyServer
+(
+	const char * server,
+ char ** proxyAddress,       // [out] the proxy address
+ unsigned short * proxyPort  // [out] the proxy port
+)
+{
+	char * strPort;
+
+	// Make sure each pointer is valid as well as what it points to
+	assert(server && *server);
+	assert(proxyAddress && !*proxyAddress);
+	assert(proxyPort);
+
+	// Copy off the server address.
+	///////////////////////////////
+	*proxyAddress = goastrdup(server);
+	if(!*proxyAddress)
+		return GHTTPFalse;
+
+	// Check for a port.
+	////////////////////
+	if((strPort = strchr(*proxyAddress, ':')) != NULL)
+	{
+		*strPort++ = '\0';
+
+		// Try getting the port.
+		////////////////////////
+		*proxyPort = (unsigned short)atoi(strPort);
+		if(!*proxyPort)
+		{
+			gsifree(*proxyAddress);
+			*proxyAddress = NULL;
+			return GHTTPFalse;
+		}
+	}
+	else
+	{
+		*proxyPort = GHI_DEFAULT_PORT;
+	}
+	return GHTTPTrue;
+}
+
+
+GHTTPBool ghiSetProxy
+(
+	const char * server
+)
+{
+	// Free any existing proxy address.
+	///////////////////////////////////
+	if(ghiProxyAddress)
+	{
+		gsifree(ghiProxyAddress);
+		ghiProxyAddress = NULL;
+	}
+	ghiProxyPort = 0;
+
+	// If a server was supplied, try to parse it
+	if(server && *server)
+		return ghiParseProxyServer(server, &ghiProxyAddress, &ghiProxyPort);
+
+	// No server supplied results in proxy being cleared
+	return GHTTPTrue;
+}
+
+GHTTPBool ghiSetRequestProxy
+(
+	GHTTPRequest request,
+ const char * server
+)
+{
+	// Obtain the connection for this request
+	GHIConnection* connection = ghiRequestToConnection(request);
+	if (connection == NULL)
+		return GHTTPFalse;
+
+	// Free any existing proxy address.
+	///////////////////////////////////
+	if(connection->proxyOverrideServer)
+	{
+		gsifree(connection->proxyOverrideServer);
+		connection->proxyOverrideServer = NULL;
+		connection->proxyOverridePort = GHI_DEFAULT_PORT;
+	}
+
+	// If a server was supplied, try to parse it
+	if(server && *server)
+		return ghiParseProxyServer(server, &connection->proxyOverrideServer, &connection->proxyOverridePort);
+
+	// No server supplied results in proxy being cleared
+	return GHTTPTrue;
+}
+
+void ghiThrottleSettings
+(
+	int bufferSize,
+ gsi_time timeDelay
+)
+{
+	ghiThrottleBufferSize = bufferSize;
+	ghiThrottleTimeDelay = timeDelay;
+}
+#endif
+
 

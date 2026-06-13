@@ -103,7 +103,9 @@
     #define _MD5_H_
     #include <ninet.h>
     #undef _MD5_H_
+    #ifdef SDK_BUILD_ARM
     #include <extras.h>
+    #endif
 #else
     #error The GameSpy SDKs do not support this operating system
 #endif
@@ -560,6 +562,7 @@ char *goastrdup(const char *src);
     #define h_addr_list addrList
     #define h_addr addrList[0]
 
+    #ifdef SDK_BUILD_ARM
     int socket(int pf, int type, int protocol);
     int closesocket(SOCKET sock);
     int shutdown(SOCKET sock, int how);
@@ -621,22 +624,106 @@ char *goastrdup(const char *src);
         int optlen
     );
 
-    #define gethostbyaddr(a, l, t) SO_GetHostByAddr(a, l, t)
-    #define gethostbyname(n) SO_GetHostByName(n)
-
     int getsockname(
         SOCKET sock,
         SOCKADDR *addr,
         int *len
     );
 
+    unsigned long inet_addr(const char *name);
+    #else
+    #define socket(_pf,_type,_protocol) libdwcgs_socket(_pf,_type,_protocol)
+    #define closesocket(_sock) libdwcgs_closesocket(_sock)
+    #define shutdown(_sock,_how) libdwcgs_shutdown(_sock,_how)
+    #define bind(_sock,_addr,_len) libdwcgs_bind(_sock,_addr,_len)
+    #define connect(_sock,_addr,_len) libdwcgs_connect(_sock,_addr,_len)
+    #define listen(_sock,_backlog) libdwcgs_listen(_sock,_backlog)
+    #define accept(_sock,_addr,_len) libdwcgs_accept(_sock,_addr,_len)
+    #define recv(_sock,_buf,_len,_flags) libdwcgs_recv(_sock,_buf,_len,_flags)
+    #define recvfrom(_sock,_buf,_len,_flags,_addr,_fromlen) libdwcgs_recvfrom(_sock,_buf,_len,_flags,_addr,_fromlen)
+    #define send(_sock,_buf,_len,_flags) libdwcgs_send(_sock,_buf,_len,_flags)
+    #define sendto(_sock,_buf,_len,_flags,_addr,_tolen) libdwcgs_sendto(_sock,_buf,_len,_flags,_addr,_tolen)
+    #define getsockopt(_sock,_level,_optname,_optval,_optlen) libdwcgs_getsockopt(_sock,_level,_optname,_optval,_optlen)
+    #define setsockopt(_sock,_level,_optname,_optval,_optlen) libdwcgs_setsockopt(_sock,_level,_optname,_optval,_optlen)
+    #define getsockname(_sock,_addr,_len) libdwcgs_getsockname(_sock,_addr,_len)
+    #define inet_addr(_name) libdwcgs_inet_addr(_name)
+
+    int libdwcgs_socket(int pf, int type, int protocol);
+    int libdwcgs_closesocket(SOCKET sock);
+    int libdwcgs_shutdown(SOCKET sock, int how);
+    int libdwcgs_bind(SOCKET sock, const SOCKADDR *addr, int len);
+    int libdwcgs_connect(SOCKET sock, const SOCKADDR *addr, int len);
+    int libdwcgs_listen(SOCKET sock, int backlog);
+    SOCKET libdwcgs_accept(
+        SOCKET sock,
+        SOCKADDR *addr,
+        int *len
+    );
+
+    int libdwcgs_recv(
+        SOCKET sock,
+        char *buf,
+        int len,
+        int flags
+    );
+
+    int libdwcgs_recvfrom(
+        SOCKET sock,
+        char *buf,
+        int len,
+        int flags,
+        SOCKADDR *addr,
+        int *fromlen
+    );
+
+    int libdwcgs_send(
+        SOCKET sock,
+        const char *buf,
+        int len,
+        int flags
+    );
+
+    int libdwcgs_sendto(
+        SOCKET sock,
+        const char *buf,
+        int len,
+        int flags,
+        const SOCKADDR *addr,
+        int tolen
+    );
+
+    int libdwcgs_getsockopt(
+        SOCKET sock,
+        int level,
+        int optname,
+        char *optval,
+        int *optlen
+    );
+
+    int libdwcgs_setsockopt(
+        SOCKET sock,
+        int level,
+        int optname,
+        const char *optval,
+        int optlen
+    );
+
+    int libdwcgs_getsockname(
+        SOCKET sock,
+        SOCKADDR *addr,
+        int *len
+    );
+
+    unsigned long libdwcgs_inet_addr(const char *name);
+    #endif
+    #define gethostbyaddr(a, l, t) SO_GetHostByAddr(a, l, t)
+    #define gethostbyname(n) SO_GetHostByName(n)
+
     #define htonl(l) SO_HtoNl(l)
     #define ntohl(l) SO_NtoHl(l)
     #define htons(s) SO_HtoNs(s)
     #define ntohs(s) SO_NtoHs(s)
     #define inet_ntoa(n) SO_InetNtoA(n)
-
-    unsigned long inet_addr(const char *name);
 
     int GOAGetLastError(SOCKET sock);
 #endif

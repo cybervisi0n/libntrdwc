@@ -266,6 +266,12 @@ BOOL DWC_NdCancelAsync (void)
     return DWCi_NdCancelAsync();
 }
 
+#ifdef SDK_PORT
+BOOL DWCi_NdCancelAsync( void ) {
+
+}
+#endif
+
 BOOL DWC_NdGetProgress (u32 * received, u32 * contentlen)
 {
     SDK_ASSERT(dwcndcnt);

@@ -59,7 +59,11 @@ static DWCMatchOptSCBlock stOptSCBlock;
 
 static DWCGameMatchKeyData stGameMatchKeys[DWC_QR2_GAME_RESERVED_KEYS];
 
+#ifdef SDK_PORT
+static const int stEvalRate[DWC_SB_UPDATE_MAX_SERVERS] = { 3, 3, 2, 2, 1, 1, };
+#else
 static const stEvalRate[DWC_SB_UPDATE_MAX_SERVERS] = { 3, 3, 2, 2, 1, 1, };
+#endif
 
 static int s_sbCallbackLevel = 0;
 static BOOL s_needSbFree = FALSE;
@@ -1095,7 +1099,11 @@ void DWCi_MatchProcess (BOOL fullSpec)
         (OS_TicksToMilliSeconds(OS_GetTick() - DWCi_GetMatchCnt()->nnFailedTime) > DWC_WAIT_NN_RETRY_TIMEOUT)) {
 
         DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "Timeout : wait NN retry.\n");
+        #ifdef SDK_PORT
+        DWCi_NNCompletedCallback(nr_deadbeatpartner, 0, NULL, &DWCi_GetMatchCnt()->nnInfo);
+        #else
         DWCi_NNCompletedCallback(nr_deadbeatpartner, NULL, NULL, &DWCi_GetMatchCnt()->nnInfo);
+        #endif
     }
 
     if (DWCi_GetMatchCnt()->sbObj) {
@@ -2496,7 +2504,11 @@ static BOOL DWCi_ProcessRecvMatchCommand (u8 command,
             DWCi_GetMatchCnt()->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection + 1] = srcPid;
         }
 
+        #ifdef SDK_PORT
+        remoteaddr.sin_addr.s_addr = SO_HtoNl(ip);
+        #else
         remoteaddr.sin_addr.s_addr = ip;
+        #endif
         remoteaddr.sin_port = SO_HtoNs(port);
 
         DWCi_GetMatchCnt()->nnInfo.isQR2 = 1;
