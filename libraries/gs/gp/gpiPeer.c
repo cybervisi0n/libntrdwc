@@ -1,15 +1,15 @@
 /*
-gpiPeer.c
-GameSpy Presence SDK 
-Dan "Mr. Pants" Schoenblum
-
-Copyright 1999-2007 GameSpy Industries, Inc
-
-devsupport@gamespy.com
-
-***********************************************************************
-Please see the GameSpy Presence SDK documentation for more information
-**********************************************************************/
+ * gpiPeer.c
+ * GameSpy Presence SDK
+ * Dan "Mr. Pants" Schoenblum
+ *
+ * Copyright 1999-2007 GameSpy Industries, Inc
+ *
+ * devsupport@gamespy.com
+ *
+ ***********************************************************************
+ * Please see the GameSpy Presence SDK documentation for more information
+ **********************************************************************/
 
 //INCLUDES
 //////////
@@ -22,8 +22,8 @@ Please see the GameSpy Presence SDK documentation for more information
 ///////////
 static GPResult
 gpiProcessPeerInitiatingConnection(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
@@ -33,7 +33,7 @@ gpiProcessPeerInitiatingConnection(
 	GPIBool connClosed;
 	GPIProfile * pProfile;
 	GPResult result;
-	
+
 	GS_ASSERT(peer);
 	GS_ASSERT(peer->state != GPI_PEER_DISCONNECTED && peer->state != GPI_PEER_NOT_CONNECTED);
 	// Check the state.
@@ -55,7 +55,7 @@ gpiProcessPeerInitiatingConnection(
 			break;
 		}
 		case GPI_PEER_CONNECTING:
-		{	
+		{
 			// Check if the connect finished.
 			/////////////////////////////////
 			CHECK_RESULT(gpiCheckSocketConnect(connection, peer->sock, &state));
@@ -105,7 +105,7 @@ gpiProcessPeerInitiatingConnection(
 				////////////////////
 				peer->state = GPI_PEER_WAITING;
 			}
-			
+
 			break;
 		}
 		case GPI_PEER_WAITING:
@@ -135,7 +135,7 @@ gpiProcessPeerInitiatingConnection(
 					//////////////////////////
 					if(peer->nackCount > 1)
 					{
-						// we shouldn't reach this case unless there is a problem with 
+						// we shouldn't reach this case unless there is a problem with
 						// the server when getting a buddy's signature
 
 						// Give up already.
@@ -175,14 +175,14 @@ gpiProcessPeerInitiatingConnection(
 		if(connClosed || (result != GP_NO_ERROR))
 			peer->state = GPI_PEER_DISCONNECTED;
 	}
-	
+
 	return GP_NO_ERROR;
 }
 
 static GPResult
 gpiProcessPeerAcceptingConnection(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
@@ -250,9 +250,9 @@ gpiProcessPeerAcceptingConnection(
 			// Compute what the sig should be.
 			//////////////////////////////////
 			sprintf(buffer, "%s%d%d",
-				iconnection->password,
-				iconnection->profileid,
-				pid);
+					iconnection->password,
+		   iconnection->profileid,
+		   pid);
 			MD5Digest((unsigned char *)buffer, strlen(buffer), sigCheck);
 
 			// Check the sig.
@@ -272,7 +272,7 @@ gpiProcessPeerAcceptingConnection(
 			///////////////
 			gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\aack\\");
 			gpiAppendStringToBuffer(connection, &peer->outputBuffer, "\\final\\");
-			
+
 			peer->state = GPI_PEER_CONNECTED;
 			peer->profile = (GPProfile)pid;
 		}
@@ -283,7 +283,7 @@ gpiProcessPeerAcceptingConnection(
 			peer->state = GPI_PEER_DISCONNECTED;
 			return GP_NO_ERROR;
 		}
-		
+
 		// Update the buffer length.
 		////////////////////////////
 		peer->inputBuffer.len = 0;
@@ -294,8 +294,8 @@ gpiProcessPeerAcceptingConnection(
 
 GPResult
 gpiPeerSendMessages(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	GPIBool connClosed;
@@ -340,8 +340,8 @@ gpiPeerSendMessages(
 
 static GPResult
 gpiProcessPeerConnected(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	GPIConnection * iconnection = (GPIConnection*)*connection;
@@ -383,10 +383,14 @@ gpiProcessPeerConnected(
 		peer->state = GPI_PEER_DISCONNECTED;
 		return GP_NO_ERROR;
 	}
-	
+
 	if(len > 0)
 	{
+		#ifdef SDK_PORT
+		peer->timeout = (libdwcgs_time(NULL) + GPI_PEER_TIMEOUT);
+		#else
 		peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
+		#endif
 	}
 
 	// Grab the message header.
@@ -402,58 +406,62 @@ gpiProcessPeerConnected(
 			/////////////////
 			switch(type)
 			{
-			case GPI_BM_MESSAGE:
-				callback = iconnection->callbacks[GPI_RECV_BUDDY_MESSAGE];
-				if(callback.callback != NULL)
-				{
-					GPRecvBuddyMessageArg * arg;
+				case GPI_BM_MESSAGE:
+					callback = iconnection->callbacks[GPI_RECV_BUDDY_MESSAGE];
+					if(callback.callback != NULL)
+					{
+						GPRecvBuddyMessageArg * arg;
 
-					arg = (GPRecvBuddyMessageArg *)gsimalloc(sizeof(GPRecvBuddyMessageArg));
-					if(arg == NULL)
-						Error(connection, GP_MEMORY_ERROR, "Out of memory.");
-					arg->profile = peer->profile;
-#ifndef GSI_UNICODE
-					arg->message = goastrdup(buffer);
-#else
-					arg->message = UTF8ToUCS2StringAlloc(buffer);
-#endif
-					arg->date = (unsigned int)time(NULL);
-					CHECK_RESULT(gpiAddCallback(connection, callback, arg, NULL, GPI_ADD_MESSAGE));
-				}
-				break;
+						arg = (GPRecvBuddyMessageArg *)gsimalloc(sizeof(GPRecvBuddyMessageArg));
+						if(arg == NULL)
+							Error(connection, GP_MEMORY_ERROR, "Out of memory.");
+						arg->profile = peer->profile;
+						#ifndef GSI_UNICODE
+						arg->message = goastrdup(buffer);
+						#else
+						arg->message = UTF8ToUCS2StringAlloc(buffer);
+						#endif
+						#ifdef SDK_PORT
+						arg->date = (unsigned int)libdwcgs_time(NULL);
+						#else
+						arg->date = (unsigned int)time(NULL);
+						#endif
+						CHECK_RESULT(gpiAddCallback(connection, callback, arg, NULL, GPI_ADD_MESSAGE));
+					}
+					break;
 
-			case GPI_BM_PING:
-				// Send back a pong.
-				////////////////////
-				gpiSendBuddyMessage(connection, peer->profile, GPI_BM_PONG, "1");
+				case GPI_BM_PING:
+					// Send back a pong.
+					////////////////////
+					gpiSendBuddyMessage(connection, peer->profile, GPI_BM_PONG, "1");
 
-				break;
+					break;
 
-#ifndef NOFILE
-			case GPI_BM_PONG:
-				// Lets the transfers handle this.
-				//////////////////////////////////
-				gpiTransfersHandlePong(connection, peer->profile, peer);
-				break;
-#endif
-			case GPI_BM_FILE_SEND_REQUEST:
-			case GPI_BM_FILE_SEND_REPLY:
-			case GPI_BM_FILE_BEGIN:
-			case GPI_BM_FILE_END:
-			case GPI_BM_FILE_DATA:
-			case GPI_BM_FILE_SKIP:
-			case GPI_BM_FILE_TRANSFER_THROTTLE:
-			case GPI_BM_FILE_TRANSFER_CANCEL:
-			case GPI_BM_FILE_TRANSFER_KEEPALIVE:
-				// Handle a transfer protocol message.
-				//////////////////////////////////////
-				gpiHandleTransferMessage(connection, peer, type, peer->inputBuffer.buffer, buffer, messageLen);
+					#ifndef NOFILE
+				case GPI_BM_PONG:
+					// Lets the transfers handle this.
+					//////////////////////////////////
+					gpiTransfersHandlePong(connection, peer->profile, peer);
+					break;
+					#endif
+				case GPI_BM_FILE_SEND_REQUEST:
+				case GPI_BM_FILE_SEND_REPLY:
+				case GPI_BM_FILE_BEGIN:
+				case GPI_BM_FILE_END:
+				case GPI_BM_FILE_DATA:
+				case GPI_BM_FILE_SKIP:
+				case GPI_BM_FILE_TRANSFER_THROTTLE:
+				case GPI_BM_FILE_TRANSFER_CANCEL:
+				case GPI_BM_FILE_TRANSFER_KEEPALIVE:
+					// Handle a transfer protocol message.
+					//////////////////////////////////////
+					gpiHandleTransferMessage(connection, peer, type, peer->inputBuffer.buffer, buffer, messageLen);
 
 
-				break;
+					break;
 
-			default:
-				break;
+				default:
+					break;
 			}
 
 			// Remove it from the buffer.
@@ -465,19 +473,19 @@ gpiProcessPeerConnected(
 
 	if(connClosed)
 		peer->state = GPI_PEER_DISCONNECTED;
-	
+
 	return GP_NO_ERROR;
 }
 
 
 static GPResult
 gpiProcessPeer(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	GPResult result = GP_NO_ERROR;
-	
+
 	// This state should never get out of initialization.
 	/////////////////////////////////////////////////////
 	assertWithLine(peer->state != GPI_PEER_NOT_CONNECTED, 473);
@@ -504,15 +512,15 @@ gpiProcessPeer(
 
 void
 gpiDestroyPeer(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
-#ifndef NOFILE
+	#ifndef NOFILE
 	// Cleanup any transfers that use this peer.
 	////////////////////////////////////////////
 	gpiTransferPeerDestroyed(connection, peer);
-#endif
+	#endif
 
 	shutdown(peer->sock, 2);
 	closesocket(peer->sock);
@@ -524,14 +532,14 @@ gpiDestroyPeer(
 		peer->messages = NULL;
 	}
 	freeclear(peer);
-	
+
 	GSI_UNUSED(connection);
 }
 
 void
 gpiRemovePeer(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	GPIPeer * pprev;
@@ -609,7 +617,7 @@ GPResult gpiProcessPeers(GPConnection *connection)
 	GPIPeer * peer;
 	SOCKET incoming;
 	GPResult result;
-	
+
 	// Check for incoming peer connections.
 	///////////////////////////////////////
 	if(iconnection->peerSocket != INVALID_SOCKET)
@@ -653,15 +661,22 @@ GPResult gpiProcessPeers(GPConnection *connection)
 
 		// Check for a disconnection or a timeout.
 		//////////////////////////////////////////
-		if((peer->state == GPI_PEER_DISCONNECTED) || (result != GP_NO_ERROR) || (time(NULL) > peer->timeout))
+		if((peer->state == GPI_PEER_DISCONNECTED) || (result != GP_NO_ERROR) ||
+			(
+				#ifdef SDK_PORT
+				libdwcgs_time(NULL)
+				#else
+				time(NULL)
+				#endif
+				> peer->timeout))
 		{
 			// Remove it.
 			/////////////
 			gsDebugFormat(GSIDebugCat_GP, GSIDebugType_Misc, GSIDebugLevel_Notice, "Peer disconnected, pid: %d", peer->profile);
 			gpiRemovePeer(connection, peer);
-		}		
+		}
 	}
-	
+
 	return GP_NO_ERROR;
 }
 
@@ -698,9 +713,9 @@ static void gpiFreeMessage(void * elem)
 
 GPIPeer *
 gpiAddPeer(
-  GPConnection * connection,
-  int profileid,
-  GPIBool initiate
+	GPConnection * connection,
+	int profileid,
+	GPIBool initiate
 )
 {
 	GPIPeer * peer;
@@ -716,7 +731,11 @@ gpiAddPeer(
 	peer->initiated = initiate;
 	peer->sock = INVALID_SOCKET;
 	peer->profile = profileid;
+	#ifdef SDK_PORT
+	peer->timeout = (libdwcgs_time(NULL) + GPI_PEER_TIMEOUT);
+	#else
 	peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
+	#endif
 	peer->pnext = iconnection->peerList;
 	peer->messages = ArrayNew(sizeof(GPIMessage), 0, gpiFreeMessage);
 	iconnection->peerList = peer;
@@ -725,8 +744,8 @@ gpiAddPeer(
 
 GPResult
 gpiPeerGetSig(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	GPIOperation * operation;
@@ -748,8 +767,8 @@ gpiPeerGetSig(
 
 GPResult
 gpiPeerStartConnect(
-  GPConnection * connection,
-  GPIPeer * peer
+	GPConnection * connection,
+	GPIPeer * peer
 )
 {
 	int rcode;
@@ -777,7 +796,7 @@ gpiPeerStartConnect(
 	// Set the socket sizes.
 	////////////////////////
 	gpiSetPeerSocketSizes(peer->sock);
-	
+
 	// Connect the socket.
 	//////////////////////
 	memset(&address, 0, sizeof(address));
@@ -803,10 +822,10 @@ gpiPeerStartConnect(
 
 GPResult
 gpiPeerAddMessage(
-  GPConnection * connection,
-  GPIPeer * peer,
-  int type,
-  const char * message
+	GPConnection * connection,
+	GPIPeer * peer,
+	int type,
+	const char * message
 )
 {
 	GPIMessage gpiMessage;
@@ -847,17 +866,21 @@ gpiPeerAddMessage(
 
 	// Reset the timeout.
 	/////////////////////
+	#ifdef SDK_PORT
+	peer->timeout = (libdwcgs_time(NULL) + GPI_PEER_TIMEOUT);
+	#else
 	peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
+	#endif
 
 	return GP_NO_ERROR;
 }
 
 GPResult
 gpiPeerStartTransferMessage(
-  GPConnection * connection,
-  GPIPeer * peer,
-  int type,
-  const struct GPITransferID_s * transferID
+	GPConnection * connection,
+	GPIPeer * peer,
+	int type,
+	const struct GPITransferID_s * transferID
 )
 {
 	char buffer[64];
@@ -877,10 +900,10 @@ gpiPeerStartTransferMessage(
 
 GPResult
 gpiPeerFinishTransferMessage(
-  GPConnection * connection,
-  GPIPeer * peer,
-  const char * message,
-  int len
+	GPConnection * connection,
+	GPIPeer * peer,
+	const char * message,
+	int len
 )
 {
 	char buffer[32];
@@ -890,7 +913,7 @@ gpiPeerFinishTransferMessage(
 	/////////////////////
 	if(!message)
 		message = "";
-	
+
 	if(len == -1)
 		len = (int)strlen(message);
 
@@ -906,7 +929,11 @@ gpiPeerFinishTransferMessage(
 
 	// Reset the timeout.
 	/////////////////////
+	#ifdef SDK_PORT
+	peer->timeout = (libdwcgs_time(NULL) + GPI_PEER_TIMEOUT);
+	#else
 	peer->timeout = (time(NULL) + GPI_PEER_TIMEOUT);
-		
+	#endif
+
 	return GP_NO_ERROR;
 }

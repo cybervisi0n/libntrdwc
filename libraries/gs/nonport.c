@@ -4,11 +4,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 gsi_time current_time()  //returns current time in milliseconds
-{ 
-#if defined(_WIN32)
-	return (GetTickCount()); 
+{
+	#if defined(_WIN32)
+	return (GetTickCount());
 
-#elif defined(_PS2)
+	#elif defined(_PS2)
 	unsigned int ticks;
 	static unsigned int msec = 0;
 	static unsigned int lastticks = 0;
@@ -18,9 +18,9 @@ gsi_time current_time()  //returns current time in milliseconds
 	{
 		sceCdReadClock(&lasttimecalled); /* libcdvd.a */
 		msec =  (unsigned int)(DEC(lasttimecalled.day) * 86400000) +
-				(unsigned int)(DEC(lasttimecalled.hour) * 3600000) +
-				(unsigned int)(DEC(lasttimecalled.minute) * 60000) +
-				(unsigned int)(DEC(lasttimecalled.second) * 1000);
+		(unsigned int)(DEC(lasttimecalled.hour) * 3600000) +
+		(unsigned int)(DEC(lasttimecalled.minute) * 60000) +
+		(unsigned int)(DEC(lasttimecalled.second) * 1000);
 	}
 
 	ticks = (unsigned int)GetTicks();
@@ -32,17 +32,17 @@ gsi_time current_time()  //returns current time in milliseconds
 
 	return msec;
 
-#elif defined(_UNIX)
+	#elif defined(_UNIX)
 	struct timeval time;
-	
+
 	gettimeofday(&time, NULL);
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 
-#elif defined(_NITRO)
+	#elif defined(_NITRO)
 	assertWithLine(OS_IsTickAvailable() == TRUE, 265);
 	return (gsi_time)OS_TicksToMilliSeconds(OS_GetTick());
 
-#elif defined(_PSP)
+	#elif defined(_PSP)
 	struct SceRtcTick ticks;
 	int result = 0;
 
@@ -52,104 +52,104 @@ gsi_time current_time()  //returns current time in milliseconds
 		ScePspDateTime time;
 		result = sceRtcGetCurrentClock(&time, 0);
 		if (result < 0)
-			return 0; // um...error handling? //Nope, should return zero since time cannot be zero					  
-		result = sceRtcGetTick(&time, &ticks);
+			return 0; // um...error handling? //Nope, should return zero since time cannot be zero
+			result = sceRtcGetTick(&time, &ticks);
 		if (result < 0)
 			return 0; //Nope, should return zero since time cannot be zero
 	}
 
 	return (gsi_time)(ticks.tick / 1000);
 
-#elif defined(_PS3)
+	#elif defined(_PS3)
 	return (gsi_time)(sys_time_get_system_time()/1000);
 
-#elif defined(_REVOLUTION)
+	#elif defined(_REVOLUTION)
 	OSTick aTickNow= OSGetTick();
 	gsi_time aMilliseconds = (gsi_time)OSTicksToMilliseconds(aTickNow);
 	return aMilliseconds;
-#else
+	#else
 	// unrecognized platform! contact devsupport
 	assert(0);
-#endif
-	
+	#endif
+
 }
 
 void msleep(gsi_time msec)
 {
-#if defined(_WIN32)
+	#if defined(_WIN32)
 	Sleep(msec);
 
-#elif defined(_PS2)
+	#elif defined(_PS2)
 	#ifdef SN_SYSTEMS
-		sn_delay((int)msec);
+	sn_delay((int)msec);
 	#endif
 	#ifdef EENET
-		if(msec >= 1000)
-		{
-			sleep(msec / 1000);
-			msec -= (msec / 1000);
-		}
-		if(msec)
-			usleep(msec * 1000);
+	if(msec >= 1000)
+	{
+		sleep(msec / 1000);
+		msec -= (msec / 1000);
+	}
+	if(msec)
+		usleep(msec * 1000);
 	#endif
 	#ifdef INSOCK
-		DelayThread(msec * 1000);
+	DelayThread(msec * 1000);
 	#endif
 
-#elif defined(_PSP)
+	#elif defined(_PSP)
 	sceKernelDelayThread(msec * 1000);
 
-#elif defined(_UNIX)
+	#elif defined(_UNIX)
 	usleep(msec * 1000);
 
-#elif defined(_NITRO)
+	#elif defined(_NITRO)
 	OS_Sleep(msec);
 
-#elif defined(_PS3)
+	#elif defined(_PS3)
 	sys_timer_usleep(msec* 1000);
-#elif defined (_REVOLUTION)
+	#elif defined (_REVOLUTION)
 	OSSleepMilliseconds(msec);
-#else
+	#else
 	assert(0); // missing platform handler, contact devsupport
-#endif
+	#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 void SocketStartUp()
 {
-#if defined(_WIN32) 
+	#if defined(_WIN32)
 	WSADATA data;
 
 	#if defined(_X360)
-		XNetStartupParams xnsp;
-		memset(&xnsp,0,sizeof(xnsp));
-		xnsp.cfgSizeOfStruct=sizeof(xnsp);
-		xnsp.cfgFlags=XNET_STARTUP_BYPASS_SECURITY;
-		if(0 != XNetStartup(&xnsp))
-		{
-			OutputDebugString("XNetStartup failed\n");
-		}
+	XNetStartupParams xnsp;
+	memset(&xnsp,0,sizeof(xnsp));
+	xnsp.cfgSizeOfStruct=sizeof(xnsp);
+	xnsp.cfgFlags=XNET_STARTUP_BYPASS_SECURITY;
+	if(0 != XNetStartup(&xnsp))
+	{
+		OutputDebugString("XNetStartup failed\n");
+	}
 	#endif
 
 	// added support for winsock2
 	#if (!defined(_XBOX) || defined(_X360)) && (defined(GSI_WINSOCK2) || defined(_X360))
-		WSAStartup(MAKEWORD(2,2), &data);
+	WSAStartup(MAKEWORD(2,2), &data);
 	#else
-		WSAStartup(MAKEWORD(1,1), &data);
+	WSAStartup(MAKEWORD(1,1), &data);
 	#endif
 	// end added
-#endif
+	#endif
 }
 
 void SocketShutDown()
 {
-#if defined(_WIN32)
+	#if defined(_WIN32)
 	WSACleanup();
 	#if defined(_X360)
-		XNetCleanup();
+	XNetCleanup();
 	#endif
-#endif
+	#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -198,137 +198,137 @@ int SetSockBlocking(SOCKET sock, int isblocking)
 {
 	int rcode;
 
-#if defined(_REVOLUTION)
+	#if defined(_REVOLUTION)
 	int val;
-	
+
 	val = SOFcntl(sock, SO_F_GETFL, 0);
-	
+
 	if(isblocking)
 		val &= ~SO_O_NONBLOCK;
 	else
 		val |= SO_O_NONBLOCK;
-	
+
 	rcode = SOFcntl(sock, SO_F_SETFL, val);
-#elif defined(_NITRO)
+	#elif defined(_NITRO)
 	int val;
-	
+
 	val = SOC_Fcntl(sock, SOC_F_GETFL, 0);
-	
+
 	if(isblocking)
 		val &= ~SOC_O_NONBLOCK;
 	else
 		val |= SOC_O_NONBLOCK;
-	
+
 	rcode = SOC_Fcntl(sock, SOC_F_SETFL, val);
-#else
-	#if defined(_PS2) || defined(_PS3)
-		// EENet requires int
-		// SNSystems requires int
-		// Insock requires int
-		// PS3 requires int
-		gsi_i32 argp;
 	#else
-		unsigned long argp;
+	#if defined(_PS2) || defined(_PS3)
+	// EENet requires int
+	// SNSystems requires int
+	// Insock requires int
+	// PS3 requires int
+	gsi_i32 argp;
+	#else
+	unsigned long argp;
 	#endif
-		
-		if(isblocking)
-			argp = 0;
-		else
-			argp = 1;
+
+	if(isblocking)
+		argp = 0;
+	else
+		argp = 1;
 
 	#ifdef _PS2
-		#ifdef SN_SYSTEMS
-			rcode = setsockopt(sock, SOL_SOCKET, (isblocking) ? SO_BIO : SO_NBIO, &argp, sizeof(argp));
-		#endif
-
-		#ifdef EENET
-			rcode = setsockopt(sock, SOL_SOCKET, SO_NBIO, &argp, sizeof(argp));
-		#endif
-
-		#ifdef INSOCK
-			if (isblocking)
-				argp = -1;
-			else
-				argp = 5; //added longer timeout to 5ms
-			sceInsockSetRecvTimeout(sock, argp);
-			sceInsockSetSendTimeout(sock, argp);
-			sceInsockSetShutdownTimeout(sock, argp);
-			GSI_UNUSED(sock);
-			rcode = 0;
-		#endif
-	#elif defined(_PSP)
-		rcode = setsockopt(sock, SCE_NET_INET_SOL_SOCKET, SCE_NET_INET_SO_NBIO, &argp, sizeof(argp));
-	#elif defined(_PS3)
-		rcode = setsockopt(sock, SOL_SOCKET, SO_NBIO, &argp, sizeof(argp));
-	#else
-		rcode = ioctlsocket(sock, FIONBIO, &argp);
+	#ifdef SN_SYSTEMS
+	rcode = setsockopt(sock, SOL_SOCKET, (isblocking) ? SO_BIO : SO_NBIO, &argp, sizeof(argp));
 	#endif
-#endif
+
+	#ifdef EENET
+	rcode = setsockopt(sock, SOL_SOCKET, SO_NBIO, &argp, sizeof(argp));
+	#endif
+
+	#ifdef INSOCK
+	if (isblocking)
+		argp = -1;
+	else
+		argp = 5; //added longer timeout to 5ms
+		sceInsockSetRecvTimeout(sock, argp);
+	sceInsockSetSendTimeout(sock, argp);
+	sceInsockSetShutdownTimeout(sock, argp);
+	GSI_UNUSED(sock);
+	rcode = 0;
+	#endif
+	#elif defined(_PSP)
+	rcode = setsockopt(sock, SCE_NET_INET_SOL_SOCKET, SCE_NET_INET_SO_NBIO, &argp, sizeof(argp));
+	#elif defined(_PS3)
+	rcode = setsockopt(sock, SOL_SOCKET, SO_NBIO, &argp, sizeof(argp));
+	#else
+	rcode = ioctlsocket(sock, FIONBIO, &argp);
+	#endif
+	#endif
 
 	if(rcode == 0)
 	{
 		gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Comment,
-			"SetSockBlocking: Set socket %d to %s\r\n", (unsigned int)sock, isblocking ? "blocking":"non-blocking");
+					  "SetSockBlocking: Set socket %d to %s\r\n", (unsigned int)sock, isblocking ? "blocking":"non-blocking");
 		return 1;
 	}
 
 	gsDebugFormat(GSIDebugCat_Common, GSIDebugType_Network, GSIDebugLevel_Comment,
-			"SetSockBlocking failed: tried to set socket %d to %s\r\n", (unsigned int)sock, isblocking ? "blocking":"non-blocking");
+				  "SetSockBlocking failed: tried to set socket %d to %s\r\n", (unsigned int)sock, isblocking ? "blocking":"non-blocking");
 	return 0;
 }
 
 #ifndef INSOCK
-	int SetReceiveBufferSize(SOCKET sock, int size)
-	{
-		int rcode;
-		rcode = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (const char *)&size, sizeof(int));
-		return gsiSocketIsNotError(rcode);
-	}
+int SetReceiveBufferSize(SOCKET sock, int size)
+{
+	int rcode;
+	rcode = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (const char *)&size, sizeof(int));
+	return gsiSocketIsNotError(rcode);
+}
 
-	int SetSendBufferSize(SOCKET sock, int size)
-	{
-		int rcode;
-		rcode = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (const char *)&size, sizeof(int));
-		return gsiSocketIsNotError(rcode);
-	}
+int SetSendBufferSize(SOCKET sock, int size)
+{
+	int rcode;
+	rcode = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (const char *)&size, sizeof(int));
+	return gsiSocketIsNotError(rcode);
+}
 
-	int GetReceiveBufferSize(SOCKET sock)
-	{
-		int rcode;
-		int size;
-		int len;
+int GetReceiveBufferSize(SOCKET sock)
+{
+	int rcode;
+	int size;
+	int len;
 
-		len = sizeof(size);
+	len = sizeof(size);
 
-		rcode = getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&size, &len);
+	rcode = getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&size, &len);
 
-		if(gsiSocketIsError(rcode))
-			return -1;
+	if(gsiSocketIsError(rcode))
+		return -1;
 
-		return size;
-	}
+	return size;
+}
 
-	int GetSendBufferSize(SOCKET sock)
-	{
-		int rcode;
-		int size;
-		int len;
+int GetSendBufferSize(SOCKET sock)
+{
+	int rcode;
+	int size;
+	int len;
 
-		len = sizeof(size);
+	len = sizeof(size);
 
-		rcode = getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&size, &len);
+	rcode = getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&size, &len);
 
-		if(gsiSocketIsError(rcode))
-			return -1;
+	if(gsiSocketIsError(rcode))
+		return -1;
 
-		return size;
-	}
-	
-	// Formerly known as ghiSocketSelect
+	return size;
+}
+
+// Formerly known as ghiSocketSelect
 #ifdef SN_SYSTEMS
-	#undef FD_SET
-	#define FD_SET(s,p)   ((p)->array[((s) - 1) >> SN_FD_SHR] |= \
-                       (unsigned int)(1 << (((s) - 1) & SN_FD_BITS)) )
+#undef FD_SET
+#define FD_SET(s,p)   ((p)->array[((s) - 1) >> SN_FD_SHR] |= \
+(unsigned int)(1 << (((s) - 1) & SN_FD_BITS)) )
 
 #endif
 #endif
@@ -337,7 +337,7 @@ int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* 
 {
 	SOPollFD pollFD;
 	int rcode;
-	
+
 	pollFD.fd = theSocket;
 	pollFD.events = 0;
 	if(theReadFlag != NULL)
@@ -377,24 +377,24 @@ int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* 
 #ifndef SDK_BUILD_ARM
 gsi_u32 gsiGetBroadcastIP(void)
 {
-#if defined(_NITRO)
+	#if defined(_NITRO)
 	gsi_u32 ip;
 	IP_GetBroadcastAddr(NULL, (u8*)&ip);
 	return ip;
-#else
+	#else
 	return 0xFFFFFFFF;
-#endif
+	#endif
 }
 
 int SetSockBroadcast(SOCKET sock)
 {
-#if !defined(INSOCK) && !defined(_NITRO)
+	#if !defined(INSOCK) && !defined(_NITRO)
 	int optval = 1;
 	if(setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&optval, sizeof(optval)) != 0)
 		return 0;
-#else
+	#else
 	GSI_UNUSED(sock);
-#endif
+	#endif
 
 	return 1;
 }
@@ -423,7 +423,7 @@ int CanSendOnSocket(SOCKET sock)
 }
 
 #if defined(_NITRO)
-    static char *aliases = NULL;
+static char *aliases = NULL;
 #endif
 
 #if defined(_PS3) || defined (_PSP)
@@ -432,7 +432,7 @@ int CanSendOnSocket(SOCKET sock)
 
 HOSTENT * getlocalhost(void)
 {
-#ifdef EENET
+	#ifdef EENET
 	#define MAX_IPS  5
 
 	static HOSTENT localhost;
@@ -509,7 +509,7 @@ HOSTENT * getlocalhost(void)
 
 	////////////////////
 	// INSOCK
-#elif defined(INSOCK)
+	#elif defined(INSOCK)
 	// Global storage
 	#define MAX_IPS  sceLIBNET_MAX_INTERFACE
 	static HOSTENT   localhost;
@@ -522,10 +522,10 @@ HOSTENT * getlocalhost(void)
 	int aNumInterfaces = 0;
 	int aInterfaceNum = 0;
 	int aCount = 0;
-	
+
 	// Get the list of interfaces
-	aNumInterfaces = sceInetGetInterfaceList(&gGSIInsockClientData, 
-		                 &gGSIInsockSocketBuffer, aInterfaceIdArray, MAX_IPS);
+	aNumInterfaces = sceInetGetInterfaceList(&gGSIInsockClientData,
+											 &gGSIInsockSocketBuffer, aInterfaceIdArray, MAX_IPS);
 	if (aNumInterfaces < 1)
 		return NULL;
 
@@ -541,8 +541,8 @@ HOSTENT * getlocalhost(void)
 	{
 		sceInetAddress_t anAddr;
 		int result = sceInetInterfaceControl(&gGSIInsockClientData, &gGSIInsockSocketBuffer,
-			                    aInterfaceIdArray[aInterfaceNum], sceInetCC_GetAddress,
-								&anAddr, sizeof(anAddr));
+											 aInterfaceIdArray[aInterfaceNum], sceInetCC_GetAddress,
+									   &anAddr, sizeof(anAddr));
 		if (result == 0)
 		{
 			// Add this interface to the array
@@ -557,8 +557,8 @@ HOSTENT * getlocalhost(void)
 	localhost.h_length = (gsi_u16)sizeof(ips[0]);
 	ipPtrs[aCount]     = NULL;
 	return &localhost;
-	
-#elif defined(_NITRO)
+
+	#elif defined(_NITRO)
 	#define MAX_IPS  5
 
 	static HOSTENT localhost;
@@ -585,7 +585,7 @@ HOSTENT * getlocalhost(void)
 
 	return &localhost;
 
-#elif defined(_REVOLUTION)
+	#elif defined(_REVOLUTION)
 	#define MAX_IPS  5
 	static HOSTENT aLocalHost;
 	static char * aliases = NULL;
@@ -600,18 +600,18 @@ HOSTENT * getlocalhost(void)
 	ret = SOGetInterfaceOpt(NULL, SO_SOL_CONFIG, SO_CONFIG_IP_ADDR_NUMBER, &aNumOfIps, &aSizeNumOfIps);
 	if (ret != 0)
 		return NULL;
-	
+
 	aAddrsSize = (int)(MAX_IPS * sizeof(IPAddrEntry));
 	aAddrsSizeInitial = aAddrsSize;
 	ret = SOGetInterfaceOpt(NULL, SO_SOL_CONFIG, SO_CONFIG_IP_ADDR_TABLE, &aAddrs, &aAddrsSize);
 	if (ret != 0)
 		return NULL;
-	
+
 	if (aAddrsSize != aAddrsSizeInitial)
 	{
 		aNumOfIps = aAddrsSize / (int)sizeof(IPAddrEntry);
 	}
-	
+
 	aLocalHost.h_name = "localhost";
 	aLocalHost.h_aliases = &aliases;
 	aLocalHost.h_addrtype = AF_INET;
@@ -623,15 +623,15 @@ HOSTENT * getlocalhost(void)
 		{
 			memcpy(&ips[i], &aAddrs[i].addr, sizeof(aAddrs[i].addr));
 			ipPtrs[i] = (u8 *)&ips[i];
-		}			
-		else 
+		}
+		else
 			ipPtrs[i] = NULL;
 	}
 	aLocalHost.h_addr_list = ipPtrs;
-	
+
 	return &aLocalHost;
 
-#elif defined(_X360)
+	#elif defined(_X360)
 	XNADDR addr;
 	DWORD rcode;
 	static HOSTENT localhost;
@@ -656,11 +656,11 @@ HOSTENT * getlocalhost(void)
 
 	return &localhost;
 
-#elif defined(_XBOX)
+	#elif defined(_XBOX)
 	return NULL;
 
 
-#else
+	#else
 	char hostname[256] = "";
 
 	// get the local host's name
@@ -668,7 +668,7 @@ HOSTENT * getlocalhost(void)
 
 	// return the host for that name
 	return gethostbyname(hostname);
-#endif
+	#endif
 }
 #endif
 
@@ -893,7 +893,11 @@ int GOAGetLastError(SOCKET sock)
 
 // note that this doesn't return the standard time() value
 // because the DS doesn't know what timezone it's in
+#ifdef SDK_PORT
+time_t libdwcgs_time(time_t *timer)
+#else
 time_t time(time_t *timer)
+#endif
 {
 	time_t t;
 
@@ -957,11 +961,11 @@ int Util_RandInt(int low, int high)
 {
 	int range = high-low;
 	int num;
-	
+
 	if (range == 0)
 		return (low); // Prevent divide by zero
 
-	num = (int)(longrand() % range);
+		num = (int)(longrand() % range);
 
 	return(num + low);
 }
@@ -970,8 +974,8 @@ int Util_RandInt(int low, int high)
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /*****************************
-UNICODE ENCODING
-******************************/
+ * UNICODE ENCODING
+ ******************************/
 
 static void QuartToTrip(char *quart, char *trip, int inlen)
 {
@@ -1014,7 +1018,7 @@ void B64Decode(char *input, char *output, int * len, int encodingType)
 	int readpos = 0;
 	int writepos = 0;
 	char block[4];
-	
+
 	int outlen = -1;
 	int inlen = (int)strlen(input);
 
@@ -1022,8 +1026,8 @@ void B64Decode(char *input, char *output, int * len, int encodingType)
 	// now supports URL safe encoding
 	////////////////////////////////////////////////
 	switch(encodingType)
-	{	
-		case 1: 
+	{
+		case 1:
 			encoding = alternateEncoding;
 			break;
 		case 2:
@@ -1065,7 +1069,7 @@ void B64Decode(char *input, char *output, int * len, int encodingType)
 			break;
 		else if (input[readpos] == '\0')
 			break;
-		else 
+		else
 		{
 			//	(assert(0)); //bad input data
 			if (outlen)
@@ -1087,13 +1091,13 @@ void B64Decode(char *input, char *output, int * len, int encodingType)
 	if ((readpos != 0) && (readpos%4 != 0))
 	{
 		// fill block with pad (required for QuartToTrip)
-		memset(&block[readpos%4], encoding[2], (unsigned int)4-(readpos%4)); 
+		memset(&block[readpos%4], encoding[2], (unsigned int)4-(readpos%4));
 		QuartToTrip(block, &output[writepos], readpos%4);
 
 		// output bytes depend on the number of non-pad input bytes
 		if (readpos%4 == 3)
 			writepos += 2;
-		else 
+		else
 			writepos += 1;
 	}
 
@@ -1111,13 +1115,13 @@ void B64Encode(const char *input, char *output, int inlen, int encodingType)
 	char *holdout = output;
 	char *lastchar;
 	int todo = inlen;
-	
+
 	// 10-31-2004 : Added by Saad Nader
 	// now supports URL safe encoding
 	////////////////////////////////////////////////
 	switch(encodingType)
-	{	
-		case 1: 
+	{
+		case 1:
 			encoding = alternateEncoding;
 			break;
 		case 2:
@@ -1125,8 +1129,8 @@ void B64Encode(const char *input, char *output, int inlen, int encodingType)
 			break;
 		default: encoding = defaultEncoding;
 	}
-	
-//assume interval of 3
+
+	//assume interval of 3
 	while (todo > 0)
 	{
 		TripToQuart(input, output, min(todo, 3));
@@ -1155,5 +1159,5 @@ void B64Encode(const char *input, char *output, int inlen, int encodingType)
 			*output = encoding[0];
 		else if (*output == 63)
 			*output = encoding[1];
-	} 
+	}
 }
