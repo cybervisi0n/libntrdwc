@@ -18,7 +18,7 @@ devsupport@gamespy.com
 #pragma warning ( disable: 4127 )
 #endif // _MSC_VER
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(SDK_PORT)
 // A lock.
 //////////
 typedef void * GLock;
@@ -43,7 +43,7 @@ gsi_time ghiThrottleTimeDelay = 250;
 extern int ghiNumConnections;
 
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(SDK_PORT)
 // Creates a lock.
 //////////////////
 static GLock GNewLock(void)
@@ -102,7 +102,7 @@ static void GUnlockLock(GLock lock)
 //////////////////////////
 void ghiCreateLock(void)
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(SDK_PORT)
 	// We shouldn't already have a lock.
 	////////////////////////////////////
 	assertWithLine(!ghiGlobalLock, 108);
@@ -117,7 +117,7 @@ void ghiCreateLock(void)
 ////////////////////////
 void ghiFreeLock(void)
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(SDK_PORT)
 	if(!ghiGlobalLock)
 		return;
 
@@ -133,7 +133,7 @@ void ghiLock
 	void
 )
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(SDK_PORT)
 	if(!ghiGlobalLock)
 		return;
 
@@ -148,7 +148,7 @@ void ghiUnlock
 	void
 )
 {
-#ifdef WIN32
+#if defined(WIN32) && !defined(SDK_PORT)
 	if(!ghiGlobalLock)
 		return;
 

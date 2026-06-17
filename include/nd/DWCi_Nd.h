@@ -1,7 +1,7 @@
 #ifndef DWC_ND_DWC_ND_H
 #define DWC_ND_DWC_ND_H
 
-#if ((defined WIN32) || (defined _WIN32))
+#if ((defined WIN32) || (defined _WIN32)) && !defined(SDK_PORT)
     #pragma once
     #define BOOL int
 

@@ -24,7 +24,7 @@
 
 #if defined(_XBOX)
 #include <Xtl.h>
-#elif defined(_WIN32)
+#elif (defined(_WIN32) && !defined(SDK_PORT))
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #ifdef __WINSOCK_2_0__
@@ -148,7 +148,7 @@ int isgraph(int c);
 #define _tfopen     _wfopen
 #define _T(a)       L ## a
 
-#if defined(_WIN32) || defined(_PS2)
+#if (defined(_WIN32) && !defined(SDK_PORT)) || defined(_PS2)
 #define _tsnprintf _snwprintf
 #else
 #define _tsnprintf swprintf
@@ -164,14 +164,14 @@ int isgraph(int c);
 #define _tfopen     fopen
 #define _T(a)       a
 
-#if defined(_WIN32)
+#if (defined(_WIN32) && !defined(SDK_PORT))
 #define _tsnprintf _snprintf
 #else
 #define _tsnprintf snprintf
 #endif
 #endif
 
-#if defined(_WIN32)
+#if (defined(_WIN32) && !defined(SDK_PORT))
 #define snprintf _snprintf
 #endif
 
@@ -277,7 +277,7 @@ extern "C" {
     #ifdef _PS2
     typedef signed long gsi_i64;
     typedef unsigned long gsi_u64;
-    #elif defined(_WIN32)
+    #elif (defined(_WIN32) && !defined(SDK_PORT))
     #if (!defined(_M_IX86) || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 64))
     typedef __int64 gsi_i64;
     typedef unsigned __int64 gsi_u64;
@@ -296,7 +296,7 @@ extern "C" {
     #define gsi_char  unsigned short
     #endif
 
-    #if defined(_WIN32) && !defined(_XBOX)
+    #if (defined(_WIN32) && !defined(SDK_PORT)) && !defined(_XBOX)
     typedef CRITICAL_SECTION GSICriticalSection;
     typedef HANDLE GSISemaphoreID;
     typedef HANDLE GSIThreadID;
@@ -376,7 +376,7 @@ extern "C" {
     #define INVALID_SOCKET (-1)
     #endif
 
-    #if defined(_WIN32) && !defined(UNDER_CE)
+    #if (defined(_WIN32) && !defined(SDK_PORT)) && !defined(UNDER_CE)
     #define strcasecmp _stricmp
     #define strncasecmp _strnicmp
     #else
@@ -396,7 +396,7 @@ extern "C" {
     int strncasecmp(const char *string1, const char *string2, size_t count);
     #endif
 
-    #if !defined(_WIN32) && !defined(_NITRO)
+    #if (!defined(_WIN32) && !defined(SDK_PORT)) && !defined(_NITRO)
     typedef int SOCKET;
     typedef struct sockaddr SOCKADDR;
     typedef struct sockaddr_in SOCKADDR_IN;
@@ -446,7 +446,7 @@ extern "C" {
     #define ioctlsocket ioctl
     #endif
 
-    #if defined(_WIN32)
+    #if (defined(_WIN32) && !defined(SDK_PORT))
     #define GOAGetLastError(s) WSAGetLastError()
     #endif
 

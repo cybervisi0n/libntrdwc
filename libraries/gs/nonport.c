@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 gsi_time current_time()  //returns current time in milliseconds
 {
-	#if defined(_WIN32)
+	#if (defined(_WIN32) && !defined(SDK_PORT))
 	return (GetTickCount());
 
 	#elif defined(_PS2)
@@ -76,7 +76,7 @@ gsi_time current_time()  //returns current time in milliseconds
 
 void msleep(gsi_time msec)
 {
-	#if defined(_WIN32)
+	#if (defined(_WIN32) && !defined(SDK_PORT))
 	Sleep(msec);
 
 	#elif defined(_PS2)
@@ -118,7 +118,7 @@ void msleep(gsi_time msec)
 ///////////////////////////////////////////////////////////////////////////////
 void SocketStartUp()
 {
-	#if defined(_WIN32)
+	#if (defined(_WIN32) && !defined(SDK_PORT))
 	WSADATA data;
 
 	#if defined(_X360)
@@ -133,7 +133,7 @@ void SocketStartUp()
 	#endif
 
 	// added support for winsock2
-	#if (!defined(_XBOX) || defined(_X360)) && (defined(GSI_WINSOCK2) || defined(_X360))
+	#if (!defined(_XBOX) || defined(_X360)) && (defined(GSI_WINSOCK2) || defined(_X360)) && !defined(SDK_PORT)
 	WSAStartup(MAKEWORD(2,2), &data);
 	#else
 	WSAStartup(MAKEWORD(1,1), &data);
@@ -144,7 +144,7 @@ void SocketStartUp()
 
 void SocketShutDown()
 {
-	#if defined(_WIN32)
+	#if (defined(_WIN32) && !defined(SDK_PORT))
 	WSACleanup();
 	#if defined(_X360)
 	XNetCleanup();
