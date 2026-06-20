@@ -6,9 +6,9 @@ else
     libdwcbm = library('dwcbm',
         dependencies: [nitrosdk_dep, nitrosystem_dep, nitrowifi_dep],
         include_directories: [nitrodwc_includes, libdwcbm_includes],
-        pic: false,
+        pic: true,
         sources: libdwcbm_srcs,
-        native: true
+        native: (build_target == 'linux' or build_target == 'win64')
     )
 
     nitrodwc_libs += libdwcbm

@@ -6,9 +6,9 @@ else
     libdwcauth = library('dwcauth',
         dependencies: [nitrosdk_dep, nitrosystem_dep, nitrowifi_dep],
         include_directories: [nitrodwc_includes, libdwcauth_includes],
-        pic: false,
+        pic: true,
         sources: libdwcauth_srcs,
-        native: true
+        native: (build_target == 'linux' or build_target == 'win64')
     )
 
     nitrodwc_libs += libdwcauth
