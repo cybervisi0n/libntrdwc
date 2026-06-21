@@ -22,7 +22,11 @@ typedef struct  tagMEMSWI {
 static u8   Work[32]  ATTRIBUTE_ALIGN(32);
                         
 static u32  Address;
+#ifdef SDK_BUILD_NX
+static vu8  DwcBackupResult;
+#else
 static vu8  Result;
+#endif
 static u8   Wifi[0x0E]; 
 static u8   Comm;       
 
@@ -501,11 +505,19 @@ static void cbNvram(PXIFifoTag tag, u32 data, BOOL err)
 
 	com = (data & 0x7F00) >> 8;
 	if (com != Comm)  goto  _error;
+	#ifdef SDK_BUILD_NX
+	DwcBackupResult = RES_SUCCESS;
+	#else
 	Result = RES_SUCCESS;
+	#endif
 	return;
 
 _error :
+	#ifdef SDK_BUILD_NX
+	DwcBackupResult = RES_SUCCESS;
+	#else
 	Result = RES_FAILURE;
+	#endif
 	#ifdef  CS_DEBUG
 	{
 		OS_Printf("err : cbNvram  - %x %x\n", data, err);
