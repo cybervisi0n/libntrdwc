@@ -635,7 +635,9 @@ extern "C" {
     #define socket(_pf,_type,_protocol) libdwcgs_socket(_pf,_type,_protocol)
     #define closesocket(_sock) libdwcgs_closesocket(_sock)
     #define shutdown(_sock,_how) libdwcgs_shutdown(_sock,_how)
+#ifndef __cplusplus
     #define bind(_sock,_addr,_len) libdwcgs_bind(_sock,_addr,_len)
+#endif
     #define connect(_sock,_addr,_len) libdwcgs_connect(_sock,_addr,_len)
     #define listen(_sock,_backlog) libdwcgs_listen(_sock,_backlog)
     #define accept(_sock,_addr,_len) libdwcgs_accept(_sock,_addr,_len)
@@ -728,10 +730,12 @@ extern "C" {
     int GOAGetLastError(SOCKET sock);
     #endif
 
+#ifndef __cplusplus
     #ifndef max
     #define max(a, b)    (((a) > (b)) ? (a) : (b))
     #define min(a, b)    (((a) < (b)) ? (a) : (b))
     #endif
+#endif
 
     // GSI Cross Platform Socket Wrapper
 
