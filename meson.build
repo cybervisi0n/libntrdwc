@@ -1,4 +1,4 @@
-project('NitroDWC', 'c',
+project('libntrdwc', 'c',
     default_options: {
         'default_library': 'static',
         'prefer_static':    false
