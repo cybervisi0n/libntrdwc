@@ -13,7 +13,7 @@
 
 #include <nitro/rtc.h>
 
-#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_NX)
+#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_NX) || defined(SDK_BUILD_PROSPERO)
 #include <errno.h>
 #include <wchar.h>
 #endif

@@ -9,7 +9,7 @@
 #include "auth/util_base64.h"
 #include "decomp/decomp_defs.h"
 
-#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_NX)
+#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_NX) || defined(SDK_BUILD_PROSPERO)
 #include <errno.h>
 #endif
 
